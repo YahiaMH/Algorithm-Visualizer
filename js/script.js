@@ -2,6 +2,7 @@
 
 let arrSize = 50;
 let maxValue = 700;
+let speed = 50;
 var arr;
 const bars_container = document.querySelector('.bars-container');
 
@@ -106,6 +107,16 @@ async function sort() {
     }
 }
 
+async function bubbleSort(arr) {
+    for (var i = 0; i < arr.length; i++) {
+        for (var j = 0; j < (arr.length - i - 1); j++) {
+            if (arr[j] > arr[j + 1]) {
+                await swap(j, j + 1);
+            }
+        }
+    }
+}
+
 async function selectionSort(arr) {
     for (let i = 0; i < arr.length; i++) {
         let lowest = i
@@ -120,65 +131,19 @@ async function selectionSort(arr) {
     }
 }
 
-async function bubbleSort(arr) {
-    for (var i = 0; i < arr.length; i++) {
-        for (var j = 0; j < (arr.length - i - 1); j++) {
-            if (arr[j] > arr[j + 1]) {
-                await swap(j, j + 1);
-            }
-        }
-    }
-}
-
 async function insertionSort(arr) {
     const bars = document.getElementsByClassName("bar");
     for (let i = 1; i < arr.length; i++) {
-        let key = arr[i];
+        const key = arr[i];
         let j = i - 1;
 
-        bars[i].classList.add("comparing");
-        await sleep(25);
-
         while (j >= 0 && arr[j] > key) {
-            bars[j].classList.add("comparing");
-            arr[j + 1] = arr[j];
-            bars[j + 1].style.height = arr[j] + "%";
-            await sleep(25);
-            bars[j].classList.remove("comparing");
+            await swap(j + 1, j);
             j--;
         }
-
-        arr[j + 1] = key;
-        bars[j + 1].style.height = key + "%";
-        bars[i].classList.remove("comparing");
     }
 }
 
-async function swap(i, j) {
-    const bars = document.getElementsByClassName("bar");
-    const bar1 = bars[i];
-    const bar2 = bars[j];
-
-    bar1.classList.add("comparing");
-    bar2.classList.add("comparing");
-
-    const tempHeight = bar1.style.height;
-    bar1.style.height = bar2.style.height;
-    bar2.style.height = tempHeight;
-
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-
-    await sleep(25);
-
-    bar1.classList.remove("comparing");
-    bar2.classList.remove("comparing");
-}
-
-function sleep(ms) {
-    if (!isSorting) throw new Error('Sorting cancelled');
-    const baseDelay = 0;
-    return new Promise(resolve => setTimeout(resolve, baseDelay + (100 - speed)));
-}
 
 async function quickSort(arr, low, high) {
     if (low < high) {
@@ -207,6 +172,32 @@ async function partition(arr, low, high) {
     return i + 1;
 }
 
+
+async function swap(i, j) {
+    const bars = document.getElementsByClassName("bar");
+    const bar1 = bars[i];
+    const bar2 = bars[j];
+
+    bar1.classList.add("comparing");
+    bar2.classList.add("comparing");
+
+    const tempHeight = bar1.style.height;
+    bar1.style.height = bar2.style.height;
+    bar2.style.height = tempHeight;
+
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+
+    await sleep(25);
+
+    bar1.classList.remove("comparing");
+    bar2.classList.remove("comparing");
+}
+
+function sleep(ms) {
+    if (!isSorting) throw new Error('Sorting cancelled');
+    return new Promise(resolve => setTimeout(resolve, 100 - speed));
+}
+
 async function mergeSort(arr, left, right) {
     if (left < right) {
         const mid = Math.floor((left + right) / 2);
@@ -221,46 +212,57 @@ async function merge(arr, left, mid, right) {
     const n2 = right - mid;
     const L = new Array(n1);
     const R = new Array(n2);
+    const bars = document.getElementsByClassName("bar");
 
-    for (let i = 0; i < n1; i++) {
-        L[i] = arr[left + i];
-    }
-    for (let j = 0; j < n2; j++) {
-        R[j] = arr[mid + 1 + j];
-    }
+    // Store original values
+    for (let i = 0; i < n1; i++) L[i] = arr[left + i];
+    for (let j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
 
     let i = 0, j = 0, k = left;
 
     while (i < n1 && j < n2) {
-        const bars = document.getElementsByClassName("bar");
-        bars[k].classList.add("comparing");
-        await sleep(25);
-
         if (L[i] <= R[j]) {
-            arr[k] = L[i];
-            bars[k].style.height = L[i] + "%";
+            if (arr[k] !== L[i]) {
+                bars[k].classList.add("comparing");
+                arr[k] = L[i];
+                bars[k].style.height = L[i] + "%";
+                await sleep(25);
+                bars[k].classList.remove("comparing");
+            }
             i++;
         } else {
-            arr[k] = R[j];
-            bars[k].style.height = R[j] + "%";
+            if (arr[k] !== R[j]) {
+                bars[k].classList.add("comparing");
+                arr[k] = R[j];
+                bars[k].style.height = R[j] + "%";
+                await sleep(25);
+                bars[k].classList.remove("comparing");
+            }
             j++;
         }
-        bars[k].classList.remove("comparing");
         k++;
     }
 
     while (i < n1) {
-        arr[k] = L[i];
-        const bars = document.getElementsByClassName("bar");
-        bars[k].style.height = L[i] + "%";
+        if (arr[k] !== L[i]) {
+            bars[k].classList.add("comparing");
+            arr[k] = L[i];
+            bars[k].style.height = L[i] + "%";
+            await sleep(25);
+            bars[k].classList.remove("comparing");
+        }
         i++;
         k++;
     }
 
     while (j < n2) {
-        arr[k] = R[j];
-        const bars = document.getElementsByClassName("bar");
-        bars[k].style.height = R[j] + "%";
+        if (arr[k] !== R[j]) {
+            bars[k].classList.add("comparing");
+            arr[k] = R[j];
+            bars[k].style.height = R[j] + "%";
+            await sleep(25);
+            bars[k].classList.remove("comparing");
+        }
         j++;
         k++;
     }
@@ -304,24 +306,12 @@ async function shellSort(arr) {
     for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
         for (let i = gap; i < n; i++) {
             const temp = arr[i];
-            let j;
+            let j = i;
 
-            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
-                const bars = document.getElementsByClassName("bar");
-                bars[j].classList.add("comparing");
-                bars[j - gap].classList.add("comparing");
-
-                arr[j] = arr[j - gap];
-                bars[j].style.height = arr[j] + "%";  // Changed from px to %
-
-                await sleep(25);
-
-                bars[j].classList.remove("comparing");
-                bars[j - gap].classList.remove("comparing");
+            while (j >= gap && arr[j - gap] > temp) {
+                await swap(j, j - gap);
+                j -= gap;
             }
-            arr[j] = temp;
-            const bars = document.getElementsByClassName("bar");
-            bars[j].style.height = temp + "%";  // Changed from px to %
         }
     }
 }
