@@ -1,32 +1,110 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algorithm Visualizer</title>
-
-    <!-- Link to the main CSS file -->
+    <title>Sorting Algorithm Visualizer</title>
     <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
-<header class="pg-banner">
-    <div class="header-container">
+    <div class="min-h-screen bg-slate-50">
+        <main class="container">
+            <!-- Header -->
+            <div class="header">
+                <h1>Sorting Algorithm Visualizer</h1>
+                <p>Watch how different sorting algorithms work in real-time</p>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Algorithm</label>
+                    <select id="sortOptions">
+                        <option value="bubbleSort">Bubble Sort</option>
+                        <option value="selectionSort">Selection Sort</option>
+                        <option value="insertionSort">Insertion Sort</option>
+                        <option value="quickSort">Quick Sort</option>
+                        <option value="mergeSort">Merge Sort</option>
+                        <option value="heapSort">Heap Sort</option>
+                        <option value="shellSort">Shell Sort</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="arrSize">Array Size: <span id="sizeValue">50</span></label>
+                    <input type="range" id="arrSize" min="5" max="200" value="50">
+                </div>
+
+                <div class="control-group">
+                    <label for="speed">Speed: <span id="speedValue">50</span></label>
+                    <input type="range" id="speed" min="0" max="100" value="50">
+                </div>
+
+                <div class="button-group">
+                    <button onclick="randomize()" class="btn btn-secondary">
+                        <i data-lucide="shuffle"></i>
+                        Randomize
+                    </button>
+                    <button onclick="sort()" class="btn btn-primary">
+                        <i data-lucide="play"></i>
+                        Sort
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="visualization-panel">
+                <div class="bars-container"></div>
+            </div>
+
+            <!-- Algorithm Info -->
+            <div class="info-panel">
+                <div id="algorithmInfo"></div>
+            </div>
+        </main>
     </div>
-</header>
+    <script src="js/script.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-<main class="container">
-    <div class="bars-container">
-    </div>
-</main>
+        // Set initial algorithm info
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultAlgo = document.getElementById('sortOptions').value;
+            const info = algorithmInfo[defaultAlgo];
+            document.getElementById('algorithmInfo').innerHTML = `
+                <h3>${info.name}</h3>
+                <p>${info.description}</p>
+                <div class="complexity-info">
+                    <div class="complexity-card">
+                        <h4>Time Complexity</h4>
+                        <p>${info.timeComplexity}</p>
+                    </div>
+                    <div class="complexity-card">
+                        <h4>Space Complexity</h4>
+                        <p>${info.spaceComplexity}</p>
+                    </div>
+                </div>
+            `;
 
-<aside>
+            // Initialize slider backgrounds
+            function updateSliderBackground(slider) {
+                const value = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+                slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
+            }
 
-</aside>
-
-<footer class="pg-footer">
-</footer>
-
-<!-- Link to the main JavaScript file -->
-<script src="js/script.js"></script>
+            // Add event listeners for both sliders
+            const sliders = document.querySelectorAll('input[type="range"]');
+            sliders.forEach(slider => {
+                updateSliderBackground(slider); // Initial state
+                slider.addEventListener('input', () => updateSliderBackground(slider));
+            });
+        });
+    </script>
 </body>
 </html>
