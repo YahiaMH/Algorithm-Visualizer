@@ -38,8 +38,14 @@ function showVal() {
 }
 
 function randomize() {
+    // First, stop any ongoing sorting
     isSorting = false;
+    
     if (!bars_container) return;
+    
+    // Clear any existing highlighting
+    document.querySelectorAll('.bar.comparing').forEach(bar => bar.classList.remove('comparing'));
+    
     bars_container.innerHTML = "";
 
     // Generate random values between 5 and 95 to ensure bars stay within container
@@ -48,14 +54,22 @@ function randomize() {
     for (let i = 0; i < arr.length; i++) {
         let bar = document.createElement("div");
         bar.classList.add("bar");
-        bar.style.height = arr[i] + "%"; // Use percentage instead of pixels
+        bar.style.height = arr[i] + "%";
         bar.style.width = 100 / arr.length + "%"
         bars_container.appendChild(bar);
     }
 }
 
 async function sort() {
-    if (isSorting) return;
+    // Clear any existing highlighting first
+    document.querySelectorAll('.bar.comparing').forEach(bar => bar.classList.remove('comparing'));
+    
+    if (isSorting) {
+        isSorting = false;
+        // Wait a bit to ensure any ongoing operations complete
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    
     isSorting = true;
 
     const sortOption = document.getElementById("sortOptions").value;
@@ -84,6 +98,9 @@ async function sort() {
                 await shellSort(arr);
                 break;
         }
+    } catch (error) {
+        // If sorting was cancelled, ensure we clean up any highlights
+        document.querySelectorAll('.bar.comparing').forEach(bar => bar.classList.remove('comparing'));
     } finally {
         isSorting = false;
     }
